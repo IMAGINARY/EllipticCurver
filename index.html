@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <title>
+        </title>
+        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/jquery.mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery.mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+		<script>
+			function cubic_roots( A, B, C )
+			{
+				var sgn = function( x ) { return x < 0.0 ? -1 : 1; };
+
+				var X1, X2, X3;
+				var Q, R, D, S, T, Im;
+
+				var Q = (3*B - A*A)/9;
+				var R = (9*A*B - 27*C - 2*A*A*A)/54;
+				var D = Q*Q*Q + R*R;    // polynomial discriminant
+
+				if (D >= 0)                                 // complex or duplicate roots
+				{
+					var S = sgn(R + Math.sqrt(D))*Math.pow(Math.abs(R + Math.sqrt(D)),(1/3));
+					var T = sgn(R - Math.sqrt(D))*Math.pow(Math.abs(R - Math.sqrt(D)),(1/3));
+
+					X1 = -A/3 + (S + T);                    // real root
+					X2 = -A/3 - (S + T)/2;                  // real part of complex root
+					X3 = -A/3 - (S + T)/2;                  // real part of complex root
+					Im = Math.abs(Math.sqrt(3)*(S - T)/2);  // complex part of root pair
+				}
+				else                                        // distinct real roots
+				{
+					var th = Math.acos(R/Math.sqrt(-Math.pow(Q, 3)));
+				
+					X1 = 2*Math.sqrt(-Q)*Math.cos(th/3) - A/3;
+					X2 = 2*Math.sqrt(-Q)*Math.cos((th + 2*Math.PI)/3) - A/3;
+					X3 = 2*Math.sqrt(-Q)*Math.cos((th + 4*Math.PI)/3) - A/3;
+					Im = parseFloat("0.0");
+				}
+
+		
+
+				return { x1: X1, x2: X2, x3: X3, im: Im };
+			}
+
+			function real_cubic_roots( A, B, C )
+			{
+				var roots = cubic_roots( A, B, C );
+				var real_roots;
+				if( roots.im == 0.0 )
+					real_roots = [ roots.x1, roots.x2, roots.x3 ];
+				else
+					real_roots = [ roots.x1 ];
+				real_roots.sort( function( a, b ){ return a - b; } );
+				return real_roots;
+			}
+
+			function drawSegment( ctx, points )
+			{
+				ctx.beginPath();
+				ctx.moveTo( points[ 0 ].x, points[ 0 ].y );
+				for( i = 1; i < points.length; i++ )
+					ctx.lineTo( points[ i ].x, points[ i ].y );
+				ctx.stroke();
+			}
+
+			function ellipticCurvePointsFromTo( xmin, xmax, sign, a, b )
+			{	
+				var epsSqr = Math.pow( 0.05, 2 );	
+				var eval_cubic = function( x ) { var r = ( x * x + a ) * x + b; return r < 0 ? 0.0 : sign * Math.sqrt( r ); };
+				var distSqr = function( p1, p2 ) { var dx = p1.x - p2.x; var dy = p1.y - p2.y; return dx*dx+dy*dy; };
+
+				console.log( "xmin=" + xmin);
+				console.log( "xmax=" + xmax);
+
+				var points = [ { x: xmin, y: eval_cubic( xmin ) }, { x: ( xmin + xmax ) / 2, y: eval_cubic( ( xmin + xmax ) / 2 ) }, { x: xmax, y: eval_cubic( xmax ) } ];
+
+				for( i = 0; i < points.length - 1; )
+				{
+					if( distSqr( points[ i ], points[ i + 1 ] ) > epsSqr )
+					{
+						var x = ( points[ i ].x + points[ i + 1 ].x ) / 2;
+						var y = eval_cubic( x );
+						points.splice( i + 1, 0, { x: x, y: y } );
+					}
+					else
+						++i;
+				}
+				return points;
+			}
+
+			function draw( a, b, minmaxXY )
+			{
+				var canvas = document.getElementById( "myCanvas" );
+				var ctx = canvas.getContext("2d");
+				ctx.clearRect ( 0, 0, canvas.width, canvas.height );
+
+				size = Math.min( canvas.height, canvas.width ) / 2;
+
+				ctx.save();
+
+				ctx.translate( size, size );
+				ctx.scale( size / minmaxXY, -size / minmaxXY );
+				ctx.lineWidth="0.1";
+
+				ctx.lineJoin="round";
+				ctx.lineCap="round";
+
+				var real_roots = real_cubic_roots( 0, a, b );
+				real_roots[ real_roots.length ] = minmaxXY;
+				real_roots.sort( function( a, b ){ return a - b; } );
+
+				for( var i = 0; i < real_roots.length - 1; i += 2 )
+				{
+					var points = ellipticCurvePointsFromTo( real_roots[ i ], real_roots[ i + 1 ], 1, a, b );
+					drawSegment( ctx, points );
+					drawSegment( ctx, points.map( function( e ) { return { x: e.x, y: -e.y }; } ) );
+				}
+
+				ctx.restore();
+			}
+
+			var a = -1;
+			var b = 1;
+			var range = 3;
+		</script>
+	</head>
+	<body onLoad="draw(a,b,range);">
+		<canvas id="myCanvas" width="800" height="400"></canvas>
+		<label for="slider-a">Parameter A:</label>
+		<input type="range" name="slider-a" id="slider-a" value="-1000" min="-10000" max="10000" />
+		<label for="slider-b">Parameter B:</label>
+		<input type="range" name="slider-b" id="slider-b" value="1000" min="-10000" max="10000" />
+		<script>
+			$(document).ready(function() {
+				$( "#slider-a" ).on( "change", function( event ) {
+					a = $(this).val() / 1000.0;
+					draw( a, b, range );
+				});
+			 });
+			$(document).ready(function() {
+				$( "#slider-b" ).on( "change", function( event ) {
+					b = $(this).val() / 1000.0;
+					draw( a, b, range );
+				});
+			 });
+		</script>
+	</body>
+</html>
