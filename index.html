@@ -7,9 +7,29 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
         <title>
         </title>
-        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/jquery.mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-        <script src="https://ajax.aspnetcdn.com/ajax/jquery.mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+        <style>
+          html {
+            background: white;
+            
+          }
+          
+          body {
+            width: 500px;
+            height: 565px;
+            margin: 20px;
+            overflow: hidden;
+          }
+          
+          label {
+            font-family: sans-serif;
+            font-size: 16px;
+          }
+
+          input[type="range"] {
+            width: 500px;
+            margin-left: 0px;
+          }
+        </style>
 		<script>
 			function cubic_roots( A, B, C )
 			{
@@ -130,24 +150,23 @@
 		</script>
 	</head>
 	<body onLoad="draw(a,b,range);">
-		<canvas id="myCanvas" width="800" height="400"></canvas>
-		<label for="slider-a">Parameter A:</label>
-		<input type="range" name="slider-a" id="slider-a" value="-1000" min="-10000" max="10000" />
-		<label for="slider-b">Parameter B:</label>
-		<input type="range" name="slider-b" id="slider-b" value="1000" min="-10000" max="10000" />
+		<canvas id="myCanvas" width="500" height="400"></canvas>
+		<br /><br />
+		<label for="slider-a">Parameter A:</label><br />
+		<input type="range" name="slider-a" id="slider-a" value="-1000" min="-10000" max="10000" step="1"/>
+    <br /><br />
+		<label for="slider-b">Parameter B:</label><br />
+		<input type="range" name="slider-b" id="slider-b" value="1000" min="-10000" max="10000" step="1"/>
 		<script>
-			$(document).ready(function() {
-				$( "#slider-a" ).on( "change", function( event ) {
-					a = $(this).val() / 1000.0;
-					draw( a, b, range );
-				});
-			 });
-			$(document).ready(function() {
-				$( "#slider-b" ).on( "change", function( event ) {
-					b = $(this).val() / 1000.0;
-					draw( a, b, range );
-				});
-			 });
+			const sliderA = document.getElementById('slider-a');
+			const sliderB = document.getElementById('slider-b');
+
+			function update() {
+				a = sliderA.valueAsNumber / 1000.0;
+				b = sliderB.valueAsNumber / 1000.0;
+				draw( a, b, range );
+			}
+			sliderA.addEventListener('change', update);
 		</script>
 	</body>
 </html>
