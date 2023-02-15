@@ -1,175 +1,221 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-        <title>
-        </title>
-        <style>
-          html {
-            background: white;
-            
-          }
-          
-          body {
-            width: 500px;
-            height: 565px;
-            margin: 20px;
-            overflow: hidden;
-          }
-          
-          label {
-            font-family: sans-serif;
-            font-size: 16px;
-          }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <title> </title>
+    <style>
+      html {
+        background: white;
+      }
 
-          input[type="range"] {
-            width: 500px;
-            margin-left: 0px;
-          }
-        </style>
-		<script>
-			function cubic_roots( A, B, C )
-			{
-				var sgn = function( x ) { return x < 0.0 ? -1 : 1; };
+      body {
+        width: 500px;
+        height: 565px;
+        margin: 20px;
+        overflow: hidden;
+      }
 
-				var X1, X2, X3;
-				var Q, R, D, S, T, Im;
+      label {
+        font-family: sans-serif;
+        font-size: 16px;
+      }
 
-				var Q = (3*B - A*A)/9;
-				var R = (9*A*B - 27*C - 2*A*A*A)/54;
-				var D = Q*Q*Q + R*R;    // polynomial discriminant
+      input[type="range"] {
+        width: 500px;
+        margin-left: 0px;
+      }
+    </style>
+    <script>
+      function cubic_roots(A, B, C) {
+        const sgn = function (x) {
+          return x < 0.0 ? -1 : 1;
+        };
 
-				if (D >= 0)                                 // complex or duplicate roots
-				{
-					var S = sgn(R + Math.sqrt(D))*Math.pow(Math.abs(R + Math.sqrt(D)),(1/3));
-					var T = sgn(R - Math.sqrt(D))*Math.pow(Math.abs(R - Math.sqrt(D)),(1/3));
+        const Q = (3 * B - A * A) / 9;
+        const R = (9 * A * B - 27 * C - 2 * A * A * A) / 54;
+        const D = Q * Q * Q + R * R; // polynomial discriminant
 
-					X1 = -A/3 + (S + T);                    // real root
-					X2 = -A/3 - (S + T)/2;                  // real part of complex root
-					X3 = -A/3 - (S + T)/2;                  // real part of complex root
-					Im = Math.abs(Math.sqrt(3)*(S - T)/2);  // complex part of root pair
-				}
-				else                                        // distinct real roots
-				{
-					var th = Math.acos(R/Math.sqrt(-Math.pow(Q, 3)));
-				
-					X1 = 2*Math.sqrt(-Q)*Math.cos(th/3) - A/3;
-					X2 = 2*Math.sqrt(-Q)*Math.cos((th + 2*Math.PI)/3) - A/3;
-					X3 = 2*Math.sqrt(-Q)*Math.cos((th + 4*Math.PI)/3) - A/3;
-					Im = parseFloat("0.0");
-				}
+        if (D >= 0) {
+          // complex or duplicate roots
+          const S =
+            sgn(R + Math.sqrt(D)) * Math.pow(Math.abs(R + Math.sqrt(D)), 1 / 3);
+          const T =
+            sgn(R - Math.sqrt(D)) * Math.pow(Math.abs(R - Math.sqrt(D)), 1 / 3);
 
-		
+          const x1 = -A / 3 + (S + T); // real root
+          const x2 = -A / 3 - (S + T) / 2; // real part of complex root
+          const x3 = -A / 3 - (S + T) / 2; // real part of complex root
+          const im = Math.abs((Math.sqrt(3) * (S - T)) / 2); // complex part of root pair
+          return { x1, x2, x3, im };
+        } else {
+          // distinct real roots
+          const th = Math.acos(R / Math.sqrt(-Math.pow(Q, 3)));
 
-				return { x1: X1, x2: X2, x3: X3, im: Im };
-			}
+          const x1 = 2 * Math.sqrt(-Q) * Math.cos(th / 3) - A / 3;
+          const x2 =
+            2 * Math.sqrt(-Q) * Math.cos((th + 2 * Math.PI) / 3) - A / 3;
+          const x3 =
+            2 * Math.sqrt(-Q) * Math.cos((th + 4 * Math.PI) / 3) - A / 3;
+          const im = 0.0;
+          return { x1, x2, x3, im };
+        }
+      }
 
-			function real_cubic_roots( A, B, C )
-			{
-				var roots = cubic_roots( A, B, C );
-				var real_roots;
-				if( roots.im == 0.0 )
-					real_roots = [ roots.x1, roots.x2, roots.x3 ];
-				else
-					real_roots = [ roots.x1 ];
-				real_roots.sort( function( a, b ){ return a - b; } );
-				return real_roots;
-			}
+      function real_cubic_roots(A, B, C) {
+        const roots = cubic_roots(A, B, C);
+        const real_roots =
+          roots.im === 0.0 ? [roots.x1, roots.x2, roots.x3] : [roots.x1];
+        real_roots.sort();
+        return real_roots;
+      }
 
-			function drawSegment( ctx, points )
-			{
-				ctx.beginPath();
-				ctx.moveTo( points[ 0 ].x, points[ 0 ].y );
-				for( i = 1; i < points.length; i++ )
-					ctx.lineTo( points[ i ].x, points[ i ].y );
-				ctx.stroke();
-			}
+      function drawSegment(ctx, points) {
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for (i = 1; i < points.length; i++)
+          ctx.lineTo(points[i].x, points[i].y);
+        ctx.stroke();
+        ctx.closePath();
+      }
 
-			function ellipticCurvePointsFromTo( xmin, xmax, sign, a, b )
-			{	
-				var epsSqr = Math.pow( 0.05, 2 );	
-				var eval_cubic = function( x ) { var r = ( x * x + a ) * x + b; return r < 0 ? 0.0 : sign * Math.sqrt( r ); };
-				var distSqr = function( p1, p2 ) { var dx = p1.x - p2.x; var dy = p1.y - p2.y; return dx*dx+dy*dy; };
+      function ellipticCurvePointsFromTo(xmin, xmax, sign, a, b) {
+        const epsSqr = Math.pow(0.05, 2);
+        const eval_cubic = function (x) {
+          const r = (x * x + a) * x + b;
+          return r < 0 ? 0.0 : sign * Math.sqrt(r);
+        };
+        const distSqr = function (p1, p2) {
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          return dx * dx + dy * dy;
+        };
 
-				console.log( "xmin=" + xmin);
-				console.log( "xmax=" + xmax);
+        const points = [
+          { x: xmin, y: eval_cubic(xmin) },
+          { x: (xmin + xmax) / 2, y: eval_cubic((xmin + xmax) / 2) },
+          { x: xmax, y: eval_cubic(xmax) },
+        ];
 
-				var points = [ { x: xmin, y: eval_cubic( xmin ) }, { x: ( xmin + xmax ) / 2, y: eval_cubic( ( xmin + xmax ) / 2 ) }, { x: xmax, y: eval_cubic( xmax ) } ];
+        for (i = 0; i < points.length - 1; ) {
+          if (distSqr(points[i], points[i + 1]) > epsSqr) {
+            const x = (points[i].x + points[i + 1].x) / 2;
+            const y = eval_cubic(x);
+            points.splice(i + 1, 0, { x: x, y: y });
+          } else ++i;
+        }
+        return points;
+      }
 
-				for( i = 0; i < points.length - 1; )
-				{
-					if( distSqr( points[ i ], points[ i + 1 ] ) > epsSqr )
-					{
-						var x = ( points[ i ].x + points[ i + 1 ].x ) / 2;
-						var y = eval_cubic( x );
-						points.splice( i + 1, 0, { x: x, y: y } );
-					}
-					else
-						++i;
-				}
-				return points;
-			}
+      function draw(a, b, scale) {
+        const canvas = document.getElementById("myCanvas");
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-			function draw( a, b, minmaxXY )
-			{
-				var canvas = document.getElementById( "myCanvas" );
-				var ctx = canvas.getContext("2d");
-				ctx.clearRect ( 0, 0, canvas.width, canvas.height );
+        const half_width = canvas.width / 2.0;
+        const half_height = canvas.height / 2.0;
+        const half_size = Math.min(half_width, half_height);
 
-				size = Math.min( canvas.height, canvas.width ) / 2;
+        ctx.save();
 
-				ctx.save();
+        ctx.translate(half_width, half_height);
+        ctx.scale(half_size / scale, -half_size / scale);
+        ctx.lineWidth = "0.1";
 
-				ctx.translate( size, size );
-				ctx.scale( size / minmaxXY, -size / minmaxXY );
-				ctx.lineWidth="0.1";
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
 
-				ctx.lineJoin="round";
-				ctx.lineCap="round";
+        const showAxis = false;
+        if (showAxis) {
+          ctx.save();
+          ctx.lineWidth = "0.01";
+          ctx.beginPath();
+          ctx.moveTo(0, -1000);
+          ctx.lineTo(0, 1000);
+          ctx.moveTo(-1000, 0);
+          ctx.lineTo(1000, 0);
+          ctx.stroke();
+          ctx.closePath();
+          ctx.restore();
+        }
 
-				var real_roots = real_cubic_roots( 0, a, b );
-				real_roots[ real_roots.length ] = minmaxXY;
-				real_roots.sort( function( a, b ){ return a - b; } );
+        const xMax = (canvas.width / half_size) * scale;
+        const real_roots_in_range = real_cubic_roots(0, a, b).filter(
+          (x) => x <= xMax
+        );
+        if (real_roots_in_range.length % 2 === 1)
+          real_roots_in_range.push(xMax);
+        real_roots_in_range.sort();
 
-				for( var i = 0; i < real_roots.length - 1; i += 2 )
-				{
-					var points = ellipticCurvePointsFromTo( real_roots[ i ], real_roots[ i + 1 ], 1, a, b );
-					drawSegment( ctx, points );
-					drawSegment( ctx, points.map( function( e ) { return { x: e.x, y: -e.y }; } ) );
-				}
+        for (let i = 0; i < real_roots_in_range.length - 1; i += 2) {
+          const points = ellipticCurvePointsFromTo(
+            real_roots_in_range[i],
+            real_roots_in_range[i + 1],
+            1,
+            a,
+            b
+          );
+          drawSegment(ctx, points);
+          drawSegment(
+            ctx,
+            points.map(function (e) {
+              return { x: e.x, y: -e.y };
+            })
+          );
+        }
 
-				ctx.restore();
-			}
+        ctx.restore();
+      }
 
-			var a = -1;
-			var b = 1;
-			var range = 3;
-		</script>
-	</head>
-	<body onLoad="draw(a,b,range);">
-		<canvas id="myCanvas" width="500" height="400"></canvas>
-		<br /><br />
-		<label for="slider-a">Parameter A:</label><br />
-		<input type="range" name="slider-a" id="slider-a" value="-1000" min="-10000" max="10000" step="1"/>
+      let a = -1;
+      let b = 1;
+      let scale = 3;
+    </script>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="500" height="400"></canvas>
     <br /><br />
-		<label for="slider-b">Parameter B:</label><br />
-		<input type="range" name="slider-b" id="slider-b" value="1000" min="-10000" max="10000" step="1"/>
-		<script>
-			const sliderA = document.getElementById('slider-a');
-			const sliderB = document.getElementById('slider-b');
+    <label for="slider-a">Parameter A = <span id="value-a"></span></label><br />
+    <input
+      type="range"
+      name="slider-a"
+      id="slider-a"
+      value="-1"
+      min="-10"
+      max="10"
+      step="0.001"
+    />
+    <br /><br />
+    <label for="slider-b">Parameter B = <span id="value-b"></span></label><br />
+    <input
+      type="range"
+      name="slider-b"
+      id="slider-b"
+      value="1"
+      min="-10"
+      max="10"
+      step="0.001"
+    />
+    <script>
+      const sliderA = document.getElementById("slider-a");
+      const sliderB = document.getElementById("slider-b");
+      const valueA = document.getElementById("value-a");
+      const valueB = document.getElementById("value-b");
 
-			function update() {
-				a = sliderA.valueAsNumber / 1000.0;
-				b = sliderB.valueAsNumber / 1000.0;
-				draw( a, b, range );
-			}
-			sliderA.addEventListener('change', update);
-			sliderA.addEventListener('input', update);
-			sliderB.addEventListener('change', update);
-			sliderB.addEventListener('input', update);
-		</script>
-	</body>
+      function update() {
+        a = sliderA.valueAsNumber;
+        b = sliderB.valueAsNumber;
+        valueA.innerText = sliderA.value;
+        valueB.innerText = sliderB.value;
+        draw(a, b, scale);
+      }
+      sliderA.addEventListener("change", update);
+      sliderA.addEventListener("input", update);
+      sliderB.addEventListener("change", update);
+      sliderB.addEventListener("input", update);
+      update();
+    </script>
+  </body>
 </html>
